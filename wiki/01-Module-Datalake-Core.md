@@ -20,9 +20,10 @@ Cross-module view: compliance vs [collector template](../../datalake/docs/develo
 
 ## Cross-repo note
 
-API or schema changes here may require updates in [[02-Module-Platform-GUI]] and [[04-Module-WebUI-Mock]]. See [[00-Platform-Overview#Cross-repo API, GUI, and mock synchronization]].
+API or schema changes here may require updates in [[02-Module-Platform-GUI]] and [[04-Module-WebUI-Mock]]. See [[00-Platform-Overview#Cross-repo API, GUI, and mock synchronization]]. For which GUI screens consume which tables (live path), see [[06-WebUI-Data-Lineage]].
 
 ## See also
 
 - [[00-Platform-Overview]]
+- [[06-WebUI-Data-Lineage]]
 - [[99-Glossary-And-Legacy-Names]]

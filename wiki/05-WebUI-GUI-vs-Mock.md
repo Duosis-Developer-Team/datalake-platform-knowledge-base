@@ -76,4 +76,5 @@ See [[00-Platform-Overview]] — section *Cross-repo API, GUI, and mock synchron
 - [[00-Platform-Overview]]
 - [[02-Module-Platform-GUI]]
 - [[04-Module-WebUI-Mock]]
+- [[06-WebUI-Data-Lineage]] — route-to-table mapping for the live (non-mock) data path
 - [[99-Glossary-And-Legacy-Names]]

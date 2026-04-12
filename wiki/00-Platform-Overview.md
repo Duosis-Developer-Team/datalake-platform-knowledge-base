@@ -10,6 +10,7 @@ This wiki is the **navigation layer** for the Datalake Platform monorepo. Author
 - [[03-Module-Project-Zabake-HMDL]] — Zabbix, NetBox, Ansible/AWX automation
 - [[04-Module-WebUI-Mock]] — mock APIs and UI development profile
 - [[05-WebUI-GUI-vs-Mock]] — customer demo (mock, single-service) vs datalake-connected GUI (live data and external APIs)
+- [[06-WebUI-Data-Lineage]] — WebUI twin repos: routes, `api_client`, APIs, and primary PostgreSQL tables
 - [[99-Glossary-And-Legacy-Names]] — product naming (ORION-era docs vs current modules)
 
 ## Platform shape (summary)

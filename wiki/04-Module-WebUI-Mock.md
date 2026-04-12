@@ -21,3 +21,4 @@ Whenever [[01-Module-Datalake-Core]] or [[03-Module-Project-Zabake-HMDL]] expose
 - [[00-Platform-Overview]]
 - [[02-Module-Platform-GUI]]
 - [[05-WebUI-GUI-vs-Mock]]
+- [[06-WebUI-Data-Lineage]]

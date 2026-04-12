@@ -26,3 +26,4 @@ See [[00-Platform-Overview]] — section *Cross-repo API, GUI, and mock synchron
 - [[00-Platform-Overview]]
 - [[04-Module-WebUI-Mock]]
 - [[05-WebUI-GUI-vs-Mock]]
+- [[06-WebUI-Data-Lineage]]
