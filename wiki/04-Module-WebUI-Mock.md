@@ -12,6 +12,18 @@ Full comparison of intent and code-level differences: [[05-WebUI-GUI-vs-Mock]].
 - [docs/](../../datalake-platform-webui-mock/docs/) — project standards and notes where present
 - [tests/](../../datalake-platform-webui-mock/tests/) — contract and behavior tests for mocks
 
+## Settings (mock parity)
+
+Mock exposes the same URL structure as the GUI for demos:
+
+- `/settings` — dashboard KPIs + section cards (data: `src/services/mock_data/settings_data.py`)
+- `/settings/iam/*` — users, teams, roles, permissions, auth, audit
+- `/settings/integrations/*` — overview, LDAP, AuraNotify (static SLA table)
+
+Routing: `app.py` delegates `pathname.startswith("/settings")` to `src/pages/settings/shell.py`. Page bodies are split to mirror the GUI layout: `src/pages/settings/dashboard.py`, `src/pages/settings/iam/*.py`, `src/pages/settings/integrations/*.py`. The sidebar enables **Settings** with `href="/settings"`.
+
+`Query Explorer` mock layout mirrors GUI styling (`src/pages/query_explorer.py` + `src/utils/ui_tokens.py`).
+
 ## Cross-repo synchronization
 
 Whenever [[01-Module-Datalake-Core]] or [[03-Module-Project-Zabake-HMDL]] exposes a new endpoint or payload shape that the GUI uses, update mock data and tests here. Pair with [[02-Module-Platform-GUI]] client changes. See [[00-Platform-Overview]] — section *Cross-repo API, GUI, and mock synchronization*.
