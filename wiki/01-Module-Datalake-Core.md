@@ -18,6 +18,8 @@ Central **data plane**: collectors across DCs, NiFi pipelines, queue PostgreSQL 
 
 Cross-module view: compliance vs [collector template](../../datalake/docs/development-templates/collector_discovery_template.md), GUI table mapping, and gaps. Start at [[datalake-collectors/00-Index|datalake-collectors index]].
 
+Example (documented pattern): [[datalake-collectors/ServiceCore-ITSM|ServiceCore ITSM]] uses **explicit CLI flags** and emits **sparse per-`data_type` JSON** to stdout; a **single Avro** (`ServiceCoreDiscovery`) defines the full NiFi/DB column contract; silver `discovery_servicecore_*` tables align with each type.
+
 ## Cross-repo note
 
 API or schema changes here may require updates in [[02-Module-Platform-GUI]] and [[04-Module-WebUI-Mock]]. See [[00-Platform-Overview#Cross-repo API, GUI, and mock synchronization]]. For which GUI screens consume which tables (live path), see [[06-WebUI-Data-Lineage]].

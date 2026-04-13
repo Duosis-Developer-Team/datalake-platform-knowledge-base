@@ -19,6 +19,7 @@ Cross-module catalog: each row links to a dedicated wiki page. Authoritative sta
 | NetBox / Loki | `datalake/collectors/NetBox/` | **Partial** — discovery template + schema for VM; checklist entry | `discovery_netbox_*`, `discovery_loki_*` → discovery_rack, customer, zabbix joins | [[NetBox-Loki]] |
 | iLO Redfish | `datalake/collectors/ILO/Redfis-API/` | **Partial** — checklist: Avro / `data_type` routing in NiFi | `ilo_*` / logical `raw_ilo_*` per README | [[ILO-Redfish]] |
 | Schema-only (Zerto / Vertiv) | *no `collectors/` script in this repo* | **Gap** — DDL + GUI references exist | `raw_zerto_*`, `raw_vertiv_pdu_*` | [[Schema-Only-Zerto-Vertiv]] |
+| ServiceCore ITSM | `datalake/collectors/ServiceCore/` | **New** — explicit CLI (`--api-url`, `--api-key`, …); unified Avro `ServiceCoreDiscovery`; OData incremental; discovery UPSERT + DDL | `raw_servicecore_logs`, `discovery_servicecore_incidents`, `discovery_servicecore_servicerequests` | [[ServiceCore-ITSM]] |
 
 **Not:** GUI’de [zabbix_storage.py](../../../Datalake-Platform-GUI/services/datacenter-api/app/db/queries/zabbix_storage.py) `zabbix_storage_*` tablolarını kullanır; bu monorepo içinde `datalake/collectors/` altında bu tabloları üreten bir script **bulunamadı** — ingest kaynağı ayrıca doğrulanmalıdır ([[Schema-Only-Zerto-Vertiv]] ile aynı “gap” sınıfı).
 

@@ -17,7 +17,7 @@ Full comparison of intent and code-level differences: [[05-WebUI-GUI-vs-Mock]].
 Mock exposes the same URL structure as the GUI for demos:
 
 - `/settings` — dashboard KPIs + section cards (data: `src/services/mock_data/settings_data.py`)
-- `/settings/iam/*` — users, teams, roles, permissions, auth, audit
+- `/settings/iam/*` — users, teams, roles, permissions, auth, audit (IAM **Users / Teams / Roles** parity with GUI uses `src/services/mock_admin_client.py` in-memory store + LDAP search/import stubs; callbacks in `users_callbacks.py`, `teams_callbacks.py`, `roles_callbacks.py`)
 - `/settings/integrations/*` — overview, LDAP, AuraNotify (static SLA table)
 
 Routing: `app.py` delegates `pathname.startswith("/settings")` to `src/pages/settings/shell.py`. Page bodies are split to mirror the GUI layout: `src/pages/settings/dashboard.py`, `src/pages/settings/iam/*.py`, `src/pages/settings/integrations/*.py`. The sidebar enables **Settings** with `href="/settings"`.
