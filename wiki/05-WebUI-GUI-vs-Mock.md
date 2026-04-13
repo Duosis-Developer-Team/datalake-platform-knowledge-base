@@ -7,10 +7,10 @@ This page summarizes **why two UI repositories exist**, how they differ in **dat
 | | **datalake-platform-webui-mock** | **Datalake-Platform-GUI** |
 |--|-----------------------------------|---------------------------|
 | **Purpose** | **Public-facing customer demo**: share a UI without real tenant data or internal network access; safe for sales and POC. | **Operational visualization**: connect to the **Datalake-backed environment** and **external services** (e.g. SLA HTTP API) to show **live** metrics and inventory. |
-| **Runtime model** | **`APP_MODE=mock`**: static datasets in `src/services/mock_data/`, served via `mock_client` — **no** `datacenter-api` / `customer-api` / `query-api`, PostgreSQL, or Redis required for the minimal stack ([`docker-compose.mock.yml`](../../datalake-platform-webui-mock/docker-compose.mock.yml)). | **Three FastAPI microservices** + **PostgreSQL** (+ Redis cache in APIs) + Dash `api_client` calling `/api/v1/*`; datacenter service also calls **external** SLA endpoints per topology docs. |
+| **Runtime model** | **`APP_MODE=mock`**: dashboard data from `mock_client` / `mock_data/` (no datacenter/customer/query APIs). **Auth** matches GUI: [`docker-compose.mock.yml`](../../datalake-platform-webui-mock/docker-compose.mock.yml) runs **`auth-db` + `webui-mock`**; login, RBAC, Settings/IAM, and JWT in `api_client` when not in mock data mode. | **Three FastAPI microservices** + **PostgreSQL** (+ Redis cache in APIs) + Dash `api_client` calling `/api/v1/*`; datacenter service also calls **external** SLA endpoints per topology docs. |
 | **Risk / scope** | No production data path in mock-only deploy; branding via `APP_BRAND_TITLE` for demos. | Credentials, JWT to APIs, DB and network access; suitable for staging/production-style environments. |
 
-Minimal **mock** deploy is intentionally **one long-running service** (the Dash/WebUI container). The **GUI** stack is **multiple services** (UI + three APIs + data stores) when run as designed for real data.
+Minimal **mock data** path is still one Dash process; **compose** for the public demo image is **two** containers (UI + **auth-db**) so sessions and permissions behave like GUI. The **GUI** stack adds **three API** services + datalake DB/Redis when run for real data.
 
 ```mermaid
 flowchart TB
@@ -18,10 +18,12 @@ flowchart TB
     Demo[PublicCustomerDemo]
     Ops[DatalakeLiveVisualization]
   end
-  subgraph mockStack [webui-mock minimal]
+  subgraph mockStack [webui-mock compose]
     DashM[DashProcess]
     MockData[mock_data mock_client]
+    AuthPG[(auth_postgres)]
     DashM --> MockData
+    DashM --> AuthPG
   end
   subgraph guiStack [Datalake-Platform-GUI]
     DashG[DashProcess]
@@ -40,18 +42,18 @@ flowchart TB
 
 | Topic | **Datalake-Platform-GUI** | **datalake-platform-webui-mock** |
 |-------|---------------------------|----------------------------------|
-| **Data path** | [`src/services/api_client.py`](../../Datalake-Platform-GUI/src/services/api_client.py): **httpx** only to microservices; `_auth_headers()` sends **Bearer JWT** when a Flask session user exists. | Same file shape, plus `_is_mock_mode()`: if `APP_MODE=mock`, delegates to [`mock_client.py`](../../datalake-platform-webui-mock/src/services/mock_client.py) + [`mock_data/`](../../datalake-platform-webui-mock/src/services/mock_data/); non-mock path uses httpx **without** those auth headers in `_get_json` (simpler GET). |
+| **Data path** | [`src/services/api_client.py`](../../Datalake-Platform-GUI/src/services/api_client.py): **httpx** to microservices; `_auth_headers()` sends **Bearer JWT** when a Flask session user exists. | **Same pattern**: `_is_mock_mode()` → [`mock_client.py`](../../datalake-platform-webui-mock/src/services/mock_client.py); else httpx with `_auth_headers()` (skipped when mock mode). |
 | **Mock mode** | **Not present** (no `APP_MODE`, no `mock_data` package). | `APP_MODE=mock`; helper [`src/utils/app_mode.py`](../../datalake-platform-webui-mock/src/utils/app_mode.py) (`is_mock_mode()`). |
-| **Authentication** | Full **`src/auth/`** (Flask blueprint, sessions, LDAP/settings, API JWT); [`app.py`](../../Datalake-Platform-GUI/app.py) registers `auth_bp`, migrations, seed. | **No `src/auth/`** in this repo; [`app.py`](../../datalake-platform-webui-mock/app.py) has **no** login/settings/auth blueprint — aligns with unattended public demo. |
-| **Docker Compose** | Includes **`auth-db`** and auth-related env on `app` ([`docker-compose.yml`](../../Datalake-Platform-GUI/docker-compose.yml)). | No `auth-db`; [`docker-compose.mock.yml`](../../datalake-platform-webui-mock/docker-compose.mock.yml) runs **one** service (`webui-mock`) with `APP_MODE=mock`; optional `app-mock` profile on port 8051 in [`docker-compose.yml`](../../datalake-platform-webui-mock/docker-compose.yml). |
+| **Authentication** | Full **`src/auth/`** (Flask blueprint, sessions, LDAP/settings, API JWT); [`app.py`](../../Datalake-Platform-GUI/app.py) registers `auth_bp`, migrations, seed. | **Aligned with GUI**: same **`src/auth/`**, login, middleware, permission-aware pages/sidebar; optional **`AUTH_DISABLED=true`** (e.g. tests) impersonates admin when DB is available. |
+| **Docker Compose** | Includes **`auth-db`** and auth-related env on `app` ([`docker-compose.yml`](../../Datalake-Platform-GUI/docker-compose.yml)). | [`docker-compose.mock.yml`](../../datalake-platform-webui-mock/docker-compose.mock.yml): **`auth-db`** (host port **5434**) + **`webui-mock`** with `APP_MODE=mock` and auth env vars; optional `app-mock` profile on port 8051 in [`docker-compose.yml`](../../datalake-platform-webui-mock/docker-compose.yml). |
 | **Kubernetes** | Full example layout under [`k8s/`](../../Datalake-Platform-GUI/k8s/) (frontend, APIs, redis, ingress, monitoring, auth secrets reference). | Demo-only [`k8s-mock/`](../../datalake-platform-webui-mock/k8s-mock/) — single Deployment (`APP_MODE=mock`), Service, Ingress, ConfigMap. |
 
 ## 3. Implementation notes (code vs module docs)
 
 Facts worth capturing in the knowledge base even when not repeated in every `docs/*.md`:
 
-- **JWT to microservices**: Only the GUI repo’s `api_client` attaches `Authorization: Bearer …` via `_auth_headers()`; mock repo either uses in-memory mock data or plain httpx without that integration.
-- **Public demo surface**: Mock `app.py` does not bootstrap an auth database or session layer, reducing moving parts for externally shared URLs.
+- **JWT to microservices**: Mock `api_client` uses `_auth_headers()` when **`APP_MODE` is not mock**; in **`APP_MODE=mock`**, data comes from `mock_client` and JWT is not attached.
+- **Demo + IAM**: Mock `app.py` bootstraps the **auth** database (migrations/seed) like GUI; use **`AUTH_DISABLED=true`** only for controlled dev/test (see mock `.env.example`).
 - **Contract parity**: Mock `mock_client` functions mirror public `api_client` entry points so the same Dash pages work; when APIs change, **both** repos must be updated (see below).
 
 ## 4. Synchronization checklist
