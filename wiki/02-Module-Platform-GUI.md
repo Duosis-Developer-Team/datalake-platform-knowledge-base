@@ -56,6 +56,22 @@ app (Dash / Flask, port 8050)
 
 See [[ADR-0004-admin-api-service-separation]] for the rationale behind extracting the admin API.
 
+## OpenTelemetry (application observability)
+
+The GUI stack can export **traces** (and optional **logs** from the web UI) to an **external OpenTelemetry Collector** using **OTLP gRPC**. See [[ADR-0005-opentelemetry-instrumentation]].
+
+- **datalake-webui**: `src/telemetry/setup.py` — Flask, httpx, requests, psycopg2; Dash callback span `dash.callback.render_main_content`; auth spans; `enduser.*` on HTTP spans via middleware.  
+- **Microservices**: `services/<name>/app/telemetry.py` — FastAPI + psycopg2 (+ Redis on datacenter-api and customer-api).  
+- **Cache visibility** (datacenter-api, customer-api): `app/core/cache_backend.py` adds spans `cache.get` / `cache.singleflight` with `cache.hit`, `cache.backend`, `cache.singleflight.waited`.  
+- **Configuration**: set `OTEL_ENABLED=true`, `OTEL_EXPORTER_OTLP_ENDPOINT`, and per-service `OTEL_SERVICE_NAME` (see `docker-compose.yml` for defaults). Collector configuration is **not** part of this repo.
+
+## GUI HTTP client resilience and service cache refresh
+
+- **`src/services/api_client.py`**: Successful microservice JSON payloads are stored in **`src/services/cache_service.py`** (in-process, bounded key space). On transport/HTTP errors, the client returns the **last successful payload** for the same logical key instead of silently returning empty placeholder structures. **AuraNotify** customer availability keeps the same TTL behaviour but **does not replace** a previously good bundle when a refresh fails.
+- **`services/customer-api`**: **APScheduler** runs the same **15-minute** cache rebuild cadence as **datacenter-api** (`warm_cache` on startup, then `refresh_all_data`). Customer names for warm/refresh come from **`WARMED_CUSTOMERS`** when set, otherwise **distinct `tenant_name`** values from `discovery_netbox_inventory_device` (see `CUSTOMER_NAME_LIST` in `app/db/queries/customer.py`).
+- **`services/datacenter-api`**: Scheduler also runs **S3** and **backup** cache refresh jobs on a **30-minute** interval (`refresh_s3_cache`, `refresh_backup_cache`).
+- **Dash shell**: HTML / `/_dash/*` responses remain **`Cache-Control: no-store`**; fingerprinted **`/assets/*`** JS/CSS responses may use **`immutable`** long-lived caching (`app.py` `after_request`).
+
 ## See also
 
 - [[00-Platform-Overview]]
