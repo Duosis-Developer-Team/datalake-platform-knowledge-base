@@ -37,3 +37,4 @@ Positive and negative outcomes, follow-up work, and links to wiki or code.
 | [ADR-0002](./ADR-0002-wiki-authoritative-docs-in-module-repos.md) | Wiki as navigation layer; module repos hold authoritative technical docs |
 | [ADR-0003](./ADR-0003-hmdl-automation-standards.md) | HMDL (project-zabake) automation standards |
 | [ADR-0004](./ADR-0004-admin-api-service-separation.md) | Admin API service separation — `app` frontend-only, settings CRUD in `admin-api` |
+| [ADR-0005](./ADR-0005-netbox-location-hierarchy-resolution.md) | NetBox location hierarchy resolution for HMDL (`zabbix-netbox`) Zabbix sync |

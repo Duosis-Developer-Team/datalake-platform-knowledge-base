@@ -29,6 +29,8 @@ Loki (NetBox) üzerinden lokasyon, rack, cihaz tipi, cihaz ve VM envanteri; pane
 
 **Yüksek:** [zabbix-netbox](../../../project-zabake/zabbix-netbox/README.md) NetBox ile Zabbix senkronu; datalake ayrıca API’den okuyup DB’ye yazar — tutarlılık için alan eşlemeleri koordine edilmeli.
 
+**NetBox `dcim/locations` parent zinciri:** HMDL tarafında Zabbix host group / `DC_ID` için kullanılan isim, NetBox’ta **kök lokasyon** adıdır (üst üste `parent` takibi). Cihaz alt seviye bir lokasyondaysa (ör. DC18 → DH3 → Rack) etiket yine köke (ör. DC18) çözülür. Ayrıntı: [LOCATION_HIERARCHY_RESOLUTION.md](../../../project-zabake/zabbix-netbox/docs/design/LOCATION_HIERARCHY_RESOLUTION.md), [ADR-0005](../../adrs/ADR-0005-netbox-location-hierarchy-resolution.md).
+
 ## Gaps / debt
 
 - Checklist’teki gibi `discovery_` önekli kanonik tablo adlarına geçiş veya görünüm katmanı.
