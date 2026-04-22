@@ -11,8 +11,10 @@ This module is the path for **operational visualization** of the datalake-backed
 ## Authoritative docs
 
 - [docs/TOPOLOGY_AND_SETUP.md](../../Datalake-Platform-GUI/docs/TOPOLOGY_AND_SETUP.md) — topology, routes under `/api/v1`, environment variables, probes
+- [docs/OTEL_COLLECTOR.md](../../Datalake-Platform-GUI/docs/OTEL_COLLECTOR.md) — OpenTelemetry → external Collector (OTLP gRPC), `.env` / Compose, Java agent mapping
 - [docs/PROJECT_STANDARDS.md](../../Datalake-Platform-GUI/docs/PROJECT_STANDARDS.md) — UI/API standards (e.g. S3 dashboards)
 - [k8s/ingress.yaml](../../Datalake-Platform-GUI/k8s/ingress.yaml) — example ingress paths for APIs
+- [`.env.example`](../../Datalake-Platform-GUI/.env.example) — single root template (copy to `.env`): `DB_*`, `AUTH_*`, API URLs, Redis, optional OTEL; replaces the former split `env.example` / `.env.example` pair
 
 ## Cross-repo synchronization
 
@@ -58,12 +60,12 @@ See [[ADR-0004-admin-api-service-separation]] for the rationale behind extractin
 
 ## OpenTelemetry (application observability)
 
-The GUI stack can export **traces** (and optional **logs** from the web UI) to an **external OpenTelemetry Collector** using **OTLP gRPC**. See [[ADR-0005-opentelemetry-instrumentation]].
+The GUI stack can export **traces** (and optional **logs** from the web UI) to an **external OpenTelemetry Collector** using **OTLP gRPC**. See [[ADR-0005-opentelemetry-instrumentation]] and the operator guide [OTEL_COLLECTOR.md](../../Datalake-Platform-GUI/docs/OTEL_COLLECTOR.md) (`.env` examples, Compose service names, comparison to Java OpenTelemetry agent flags, sampling limitations).
 
 - **datalake-webui**: `src/telemetry/setup.py` — Flask, httpx, requests, psycopg2; Dash callback span `dash.callback.render_main_content`; auth spans; `enduser.*` on HTTP spans via middleware.  
 - **Microservices**: `services/<name>/app/telemetry.py` — FastAPI + psycopg2 (+ Redis on datacenter-api and customer-api).  
 - **Cache visibility** (datacenter-api, customer-api): `app/core/cache_backend.py` adds spans `cache.get` / `cache.singleflight` with `cache.hit`, `cache.backend`, `cache.singleflight.waited`.  
-- **Configuration**: set `OTEL_ENABLED=true`, `OTEL_EXPORTER_OTLP_ENDPOINT`, and per-service `OTEL_SERVICE_NAME` (see `docker-compose.yml` for defaults). Collector configuration is **not** part of this repo.
+- **Configuration**: set `OTEL_ENABLED=true`, `OTEL_EXPORTER_OTLP_ENDPOINT`, and per-service `OTEL_SERVICE_NAME` (see `docker-compose.yml` for fixed defaults per container). Collector configuration is **not** part of this repo.
 
 ## GUI HTTP client resilience and service cache refresh
 

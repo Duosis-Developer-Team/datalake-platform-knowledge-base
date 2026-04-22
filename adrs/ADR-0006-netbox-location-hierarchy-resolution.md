@@ -1,4 +1,4 @@
-# ADR-0005: NetBox location hierarchy resolution for HMDL Zabbix sync
+# ADR-0006: NetBox location hierarchy resolution for HMDL Zabbix sync
 
 - **Status**: Accepted
 - **Date**: 2026-04-15

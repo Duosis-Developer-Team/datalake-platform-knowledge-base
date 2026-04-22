@@ -70,7 +70,7 @@ See [[00-Platform-Overview]] — section *Cross-repo API, GUI, and mock synchron
 
 | Module | Primary references |
 |--------|-------------------|
-| **GUI** | [TOPOLOGY_AND_SETUP.md](../../Datalake-Platform-GUI/docs/TOPOLOGY_AND_SETUP.md), [PROJECT_STANDARDS.md](../../Datalake-Platform-GUI/docs/PROJECT_STANDARDS.md), [DOCKER_SETUP.md](../../Datalake-Platform-GUI/docs/DOCKER_SETUP.md), [AUTH_SYSTEM.md](../../Datalake-Platform-GUI/docs/AUTH_SYSTEM.md) |
+| **GUI** | [TOPOLOGY_AND_SETUP.md](../../Datalake-Platform-GUI/docs/TOPOLOGY_AND_SETUP.md), [PROJECT_STANDARDS.md](../../Datalake-Platform-GUI/docs/PROJECT_STANDARDS.md), [DOCKER_SETUP.md](../../Datalake-Platform-GUI/docs/DOCKER_SETUP.md) (Turkish quick start → topology), [AUTH_SYSTEM.md](../../Datalake-Platform-GUI/docs/AUTH_SYSTEM.md); environment template: [`.env.example`](../../Datalake-Platform-GUI/.env.example) |
 | **WebUI mock** | [TOPOLOGY_AND_SETUP.md](../../datalake-platform-webui-mock/docs/TOPOLOGY_AND_SETUP.md), [KUBERNETES_SETUP.md](../../datalake-platform-webui-mock/docs/KUBERNETES_SETUP.md), [PROJECT_STANDARDS.md](../../datalake-platform-webui-mock/docs/PROJECT_STANDARDS.md) |
 
 ## See also

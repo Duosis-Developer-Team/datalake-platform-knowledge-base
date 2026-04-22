@@ -42,4 +42,5 @@ Operators need **application observability** across the Datalake Platform GUI st
 ## References
 
 - Wiki: [[02-Module-Platform-GUI]] (observability subsection).  
+- Operator guide (Collector URL, `.env`, Java agent mapping, limitations): [`Datalake-Platform-GUI/docs/OTEL_COLLECTOR.md`](../../Datalake-Platform-GUI/docs/OTEL_COLLECTOR.md).  
 - Code: `Datalake-Platform-GUI/src/telemetry/`, `Datalake-Platform-GUI/services/*/app/telemetry.py`, `docker-compose.yml`.

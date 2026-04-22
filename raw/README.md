@@ -5,6 +5,7 @@ This folder holds **unstructured** inputs: meeting notes, exports, diagrams, and
 ## Current layout
 
 - **`archive/legacy-product-naming/`** — Older documents that used **ORION**, **D3M**, **ORION Copilot**, and related names from prior planning. Each archived markdown file has a short header pointing to the current glossary and platform overview. Binary assets (e.g. topology JPG) are stored next to those exports.
+- **`archive/Datalake-Platform-GUI-2026-04-19/`** — Snapshot of **`task/`** (feature notes) and **`legacy/`** (SPEC\*) removed from the **Datalake-Platform-GUI** repo during cleanup; not authoritative for current code.
 
 ## What to do with new raw files
 
