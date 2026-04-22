@@ -10,7 +10,10 @@ This module is the path for **operational visualization** of the datalake-backed
 
 ## Authoritative docs
 
-- [docs/TOPOLOGY_AND_SETUP.md](../../Datalake-Platform-GUI/docs/TOPOLOGY_AND_SETUP.md) — topology, routes under `/api/v1`, environment variables, probes
+- [docs/PROD_ARCHITECTURE.md](../../Datalake-Platform-GUI/docs/PROD_ARCHITECTURE.md) — **Production HA topology**: Redis Sentinel, HPA/PDB, HW/SW sizing (100+ customers), SLOs, zero-downtime rollout, cache policy; see also [[ADR-0007-production-ha-cache-architecture]]
+- [docs/FRONTEND_PERFORMANCE.md](../../Datalake-Platform-GUI/docs/FRONTEND_PERFORMANCE.md) — Browser cache headers, Dash parallel fetch, progressive render, VM table pagination, export lazy-load
+- [docs/CACHE_STRATEGY_COMPARISON.md](../../Datalake-Platform-GUI/docs/CACHE_STRATEGY_COMPARISON.md) — Legacy vs Redis cache semantics; §4a production resolution (TTL=3600, last_good key, distributed lock, CronJob warm)
+- [docs/TOPOLOGY_AND_SETUP.md](../../Datalake-Platform-GUI/docs/TOPOLOGY_AND_SETUP.md) — **Development / local** topology, routes under `/api/v1`, environment variables, probes
 - [docs/OTEL_COLLECTOR.md](../../Datalake-Platform-GUI/docs/OTEL_COLLECTOR.md) — OpenTelemetry → external Collector (OTLP gRPC), `.env` / Compose, Java agent mapping
 - [docs/PROJECT_STANDARDS.md](../../Datalake-Platform-GUI/docs/PROJECT_STANDARDS.md) — UI/API standards (e.g. S3 dashboards)
 - [k8s/ingress.yaml](../../Datalake-Platform-GUI/k8s/ingress.yaml) — example ingress paths for APIs
@@ -45,6 +48,12 @@ Shared visual tokens live in `src/utils/ui_tokens.py` (`card_style`, `kpi_card`,
 
 **LDAP Settings (Integrations)**: The LDAP form includes **Test connection** (`POST /api/v1/ldap/test`) which performs a bind and a short user search (capped at 3 results) using the form fields; if `bind_password` is empty and `ldap_id` is sent, the stored encrypted password is used (same as save). In **admin-api** `ldap_ops`, LDAP connections use `get_info=NONE` (no schema fetch). Requesting a fixed list of attribute names in that mode can trigger **“attribute type not present”** on some directories; searches therefore use **`ALL_ATTRIBUTES` (`*`)** and map `sAMAccountName` / `uid` / `cn`, `displayName`, `mail` from the entry in code (DN from `entry_dn` only — never request `distinguishedName` as an attribute). The GUI’s `ldap_service` path uses the same mapping for parity. **Group → role** mapping uses a role **dropdown** (`list_roles`) with the selected `role_id` posted via a hidden field. Callbacks: `src/pages/settings/integrations/ldap_callbacks.py`.
 
+## Customer navigation UX
+
+- The customer flow now starts at **`/customers`** with a searchable customer card grid.
+- Each customer card routes to **`/customer-view?customer=<name>`**, allowing direct deep-linking to a selected tenant.
+- The GUI startup customer list is restricted to `WARMED_CUSTOMERS` intersection, so pilot-only deployments can lock the visible customer set (for example, `("Boyner",)`).
+
 ## Service Architecture (GUI stack)
 
 ```
@@ -73,6 +82,20 @@ The GUI stack can export **traces** (and optional **logs** from the web UI) to a
 - **`services/customer-api`**: **APScheduler** runs the same **15-minute** cache rebuild cadence as **datacenter-api** (`warm_cache` on startup, then `refresh_all_data`). Customer names for warm/refresh come from **`WARMED_CUSTOMERS`** when set, otherwise **distinct `tenant_name`** values from `discovery_netbox_inventory_device` (see `CUSTOMER_NAME_LIST` in `app/db/queries/customer.py`).
 - **`services/datacenter-api`**: Scheduler also runs **S3** and **backup** cache refresh jobs on a **30-minute** interval (`refresh_s3_cache`, `refresh_backup_cache`).
 - **Dash shell**: HTML / `/_dash/*` responses remain **`Cache-Control: no-store`**; fingerprinted **`/assets/*`** JS/CSS responses may use **`immutable`** long-lived caching (`app.py` `after_request`).
+
+## Production readiness status
+
+| Area | Status | Ref |
+|------|--------|-----|
+| Redis HA (Sentinel) | Planned — Faz 3 | [[ADR-0007-production-ha-cache-architecture]] |
+| Cache TTL fix (900→3600 s) | Planned — Faz 1 | [CACHE_STRATEGY_COMPARISON.md §4a](../../Datalake-Platform-GUI/docs/CACHE_STRATEGY_COMPARISON.md) |
+| Distributed singleflight | Planned — Faz 1 | [CACHE_STRATEGY_COMPARISON.md §4a.3](../../Datalake-Platform-GUI/docs/CACHE_STRATEGY_COMPARISON.md) |
+| Cache warm CronJob | Planned — Faz 1 | [PROD_ARCHITECTURE.md §5.4](../../Datalake-Platform-GUI/docs/PROD_ARCHITECTURE.md) |
+| Frontend parallel fetch | Planned — Faz 2 | [FRONTEND_PERFORMANCE.md §2.1](../../Datalake-Platform-GUI/docs/FRONTEND_PERFORMANCE.md) |
+| Tab-lazy loading | Planned — Faz 2 | [FRONTEND_PERFORMANCE.md §2.2](../../Datalake-Platform-GUI/docs/FRONTEND_PERFORMANCE.md) |
+| Scale out (replicas ×3, PDB, HPA) | Planned — Faz 4 | [PROD_ARCHITECTURE.md §4](../../Datalake-Platform-GUI/docs/PROD_ARCHITECTURE.md) |
+| DB tuning (pg_trgm, PgBouncer, timeout) | Planned — Faz 5 | [PROD_ARCHITECTURE.md §6](../../Datalake-Platform-GUI/docs/PROD_ARCHITECTURE.md) |
+| Load test + SLO validation | Planned — Faz 6 | [PROD_ARCHITECTURE.md §1](../../Datalake-Platform-GUI/docs/PROD_ARCHITECTURE.md) |
 
 ## See also
 
