@@ -20,6 +20,7 @@ Cross-module catalog: each row links to a dedicated wiki page. Authoritative sta
 | iLO Redfish | `datalake/collectors/ILO/Redfis-API/` | **Partial** — checklist: Avro / `data_type` routing in NiFi | `ilo_*` / logical `raw_ilo_*` per README | [[ILO-Redfish]] |
 | Schema-only (Zerto / Vertiv) | *no `collectors/` script in this repo* | **Gap** — DDL + GUI references exist | `raw_zerto_*`, `raw_vertiv_pdu_*` | [[Schema-Only-Zerto-Vertiv]] |
 | ServiceCore ITSM | `datalake/collectors/ServiceCore/` | **New** — explicit CLI (`--api-url`, `--api-key`, …); unified Avro `ServiceCoreDiscovery`; OData incremental; discovery UPSERT + DDL | `raw_servicecore_logs`, `discovery_servicecore_incidents`, `discovery_servicecore_servicerequests` | [[ServiceCore-ITSM]] |
+|| CRM Dynamics 365 | `datalake/collectors/CRM/Dynamics365/` | **Full** — ServiceCore-style unified script + flow; single `crm-dynamics-discovery.py`; single Avro `CrmDynamicsDiscovery`; 14 `data_type` variants; discovery UPSERT; `discovery_crm_customer_alias` identity bridge | `discovery_crm_accounts`, `discovery_crm_invoices`, `discovery_crm_contracts` + 11 more → `customer-api /sales/*`, `datacenter-api /sales-potential` | [[CRM-Dynamics365]] |
 
 **Not:** GUI’de [zabbix_storage.py](../../../Datalake-Platform-GUI/services/datacenter-api/app/db/queries/zabbix_storage.py) `zabbix_storage_*` tablolarını kullanır; bu monorepo içinde `datalake/collectors/` altında bu tabloları üreten bir script **bulunamadı** — ingest kaynağı ayrıca doğrulanmalıdır ([[Schema-Only-Zerto-Vertiv]] ile aynı “gap” sınıfı).
 
