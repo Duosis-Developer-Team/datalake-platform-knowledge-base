@@ -52,6 +52,9 @@ Where:
 - `catalog_price_per_unit` = `discovery_crm_productpricelevels.amount` (TL price list)
 - Join: `customerid → discovery_crm_customer_alias → netbox_musteri_value → VM inventory`
 
+**Note (ADR-0010):** Sold quantities for valuation join to **sales orders / order lines**, not
+invoices or contracts.
+
 ## Consequences
 
 ### Positive
