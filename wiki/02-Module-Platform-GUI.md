@@ -97,6 +97,45 @@ The GUI stack can export **traces** (and optional **logs** from the web UI) to a
 | DB tuning (pg_trgm, PgBouncer, timeout) | Planned — Faz 5 | [PROD_ARCHITECTURE.md §6](../../Datalake-Platform-GUI/docs/PROD_ARCHITECTURE.md) |
 | Load test + SLO validation | Planned — Faz 6 | [PROD_ARCHITECTURE.md §1](../../Datalake-Platform-GUI/docs/PROD_ARCHITECTURE.md) |
 
+## Customer ITSM tab (ServiceCore incidents + service requests)
+
+Added in sprint 1 of `feature/customer-itsm-view`. Provides a per-customer view of ServiceCore ITSM activity on `src/pages/customer_view.py`.
+
+### Architecture
+
+```
+customer_view.py (_tab_itsm)
+  └── api_client.get_customer_itsm_{summary,extremes,tickets}
+        └── customer-api /api/v1/customers/{name}/itsm/*
+              └── ITSMService (services/customer-api/app/services/itsm_service.py)
+                    └── SQL CTEs (app/db/queries/itsm.py)
+                          ├── customer_users  → discovery_servicecore_users (email ILIKE)
+                          └── customer_tickets → incidents (org_user_id) ∪ SR (requester_id)
+```
+
+### Customer resolution
+
+`customer_to_email_needle(name)` in `app/utils/customer_needle.py` normalises the canonical customer name (Turkish char map + lower + noise collapse) to an email ILIKE pattern `%@%<needle>%`. No DDL changes to any datalake table (see [ADR-0009](../adrs/ADR-0009-servicecore-customer-resolution-email-domain-chain.md)).
+
+### Endpoints
+
+| Endpoint | Returns |
+|---|---|
+| `GET /api/v1/customers/{name}/itsm/summary` | KPI aggregates (counts, resolution stats, SLA breach, distributions) |
+| `GET /api/v1/customers/{name}/itsm/extremes` | Long-tail closed incidents (mean+1σ) + open SLA-breach tickets |
+| `GET /api/v1/customers/{name}/itsm/tickets` | All tickets in the report period |
+
+### GUI sections
+
+1. **KPI grid** (8 cards): total, incident open/closed, SR open/closed, SLA breach, avg/median/p95 resolution (incidents only), top category.
+2. **Priority + State distribution bar charts**.
+3. **Extreme Cases accordion**: long-tail closed incidents and open SLA-breach tickets.
+4. **All Records accordion**: separate panels for incidents and service requests (full column set).
+
+### Export
+
+Four new sheets added to the customer export workbook: `ITSM_Summary`, `ITSM_Extremes_Closed`, `ITSM_Extremes_OpenSlaBreach`, `ITSM_All_Tickets`.
+
 ## See also
 
 - [[00-Platform-Overview]]
